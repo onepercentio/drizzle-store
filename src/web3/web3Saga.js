@@ -9,23 +9,28 @@ import { Web3 } from 'web3'
  */
 
 export function * initializeWeb3 (options) {
+  let connections = {
+    https: null,
+    wss: null,
+    wallet: null
+  }
   try {
-    let web3 = null
-
-    if (options.customProvider) {
-      yield put({ type: Action.CUSTOM_PROVIDER_SET, customProvider: options.customProvider })
-      web3 = new Web3()
-      web3.setProvider(options.customProvider)
-      yield put({ type: Action.WEB3_INITIALIZED, web3 })
+    if (options.httpsProvider) {
+      connections.https = new Web3()
+      connections.https.setProvider(options.httpsProvider)
+      yield put({ type: Action.HTTPS_PROVIDER_SET, httpsProvider: options.httpsProvider, web3: connections.https })
     }
-
+    if (options.wssProvider) {
+      yield put({ type: Action.WSS_PROVIDER_SET, wssProvider: options.wssProvider })
+      connections.wss = new Web3()
+      connections.wss.setProvider(options.wssProvider)
+      yield put({ type: Action.WSS_PROVIDER_SET, wssProvider: options.wssProvider, web3: connections.wss })
+    }
     if (typeof window.ethereum !== 'undefined') {
       const { ethereum } = window
-      if (!web3) {
-        web3 = new Web3()
-        web3.setProvider(ethereum)
-        yield put({ type: Action.WEB3_INITIALIZED, web3 })
-      }
+      connections.wallet = new Web3()
+      connections.wallet.setProvider(ethereum)
+      yield put({ type: Action.WALLET_SET, wallet: ethereum, web3: connections.wallet })
       try {
         const accounts = yield call(ethereum.request, { method: 'eth_requestAccounts' })
         yield put({ type: AccountsActions.ACCOUNTS_FETCHED, accounts })
@@ -34,25 +39,13 @@ export function * initializeWeb3 (options) {
           yield put({ type: Action.WEB3_USER_DENIED })
           return
         }
-        return web3
+
+        yield put({ type: Action.WEB3_INITIALIZED, connections })
+
+        return connections
       } catch (error) {
         console.error(error)
         yield put({ type: Action.WEB3_FAILED, error })
-      }
-    } else if (options.fallback) {
-      // Attempt fallback if no web3 injection.
-      switch (options.fallback.type) {
-        case 'ws':
-          const provider = new Web3.providers.WebsocketProvider(
-            options.fallback.url
-          )
-          web3 = new Web3()
-          web3.setProvider(provider)
-          yield put({ type: Action.WEB3_INITIALIZED, web3 })
-          return web3
-        default:
-          // Invalid options; throw.
-          throw new Error('Invalid web3 fallback provided.')
       }
     } else {
       // Out of web3 options; throw.

@@ -113,6 +113,7 @@ const contractsReducer = (state = initialState, action) => {
    */
 
   if (action.type === ContractActions.EVENT_FIRED) {
+    console.log('Event fired:', action, state)
     return {
       ...state,
       [action.name]: {

@@ -67,7 +67,7 @@ class Drizzle {
     })
   }
 
-  addContract (contractConfig, events = []) {
+  addContract (contractConfig, events = [], wssConnection = null) {
     const web3Contract = getOrCreateWeb3Contract(
       this.store,
       contractConfig,
@@ -78,7 +78,9 @@ class Drizzle {
       this.web3,
       contractConfig.contractName,
       this.store,
-      events
+      events,
+      null,
+      wssConnection
     )
 
     if (this.contracts[drizzleContract.contractName]) {

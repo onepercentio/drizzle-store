@@ -27,8 +27,8 @@ export const drizzleMiddleware = drizzleInstance => store => next => action => {
 
   if (type === ContractActions.ADD_CONTRACT && drizzleInstance) {
     try {
-      const { contractConfig, events } = action
-      drizzleInstance.addContract(contractConfig, events)
+      const { contractConfig, events, wss } = action
+      drizzleInstance.addContract(contractConfig, events, wss)
     } catch (error) {
       console.error('Attempt to add a duplicate contract.\n', error)
 

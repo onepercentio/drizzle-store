@@ -8,11 +8,13 @@ class DrizzleContract {
     name,
     store,
     events = [],
-    contractArtifact = {}
+    contractArtifact = {},
+    wssConnection = null
   ) {
     this.abi = web3Contract.options.jsonInterface
     this.address = web3Contract.options.address
     this.web3 = web3
+    this.wssConnection = wssConnection
     this.contractName = name
     this.contractArtifact = contractArtifact
     this.store = store
@@ -32,22 +34,30 @@ class DrizzleContract {
       }
     }
 
-    // Register event listeners if any events.
-    if (events.length > 0) {
+    // Register event listeners if any events, only if WSS connection is available.
+    if (events.length > 0 && this.wssConnection) {
+      const wssContract = new this.wssConnection.eth.Contract(this.options.jsonInterface, this.options.address);
       for (let i = 0; i < events.length; i++) {
         const event = events[i]
-
         if (typeof event === 'object') {
           store.dispatch({
             type: ContractActions.LISTEN_FOR_EVENT,
-            contract: this,
+            contract: {
+              ...wssContract,
+              contractName: this.contractName,
+              events: this.events
+            },
             eventName: event.eventName,
             eventOptions: event.eventOptions
           })
         } else {
           store.dispatch({
             type: ContractActions.LISTEN_FOR_EVENT,
-            contract: this,
+            contract: {
+              ...wssContract,
+              contractName: this.contractName,
+              events: this.events
+            },
             eventName: event
           })
         }

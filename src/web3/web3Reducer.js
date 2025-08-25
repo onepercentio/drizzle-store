@@ -15,7 +15,8 @@ const web3Reducer = (state = initialState, action) => {
   if (action.type === Action.WEB3_INITIALIZED) {
     return {
       ...state,
-      status: 'initialized'
+      status: 'initialized',
+      connections: action.connections
     }
   }
 
@@ -50,6 +51,27 @@ const web3Reducer = (state = initialState, action) => {
     return {
       ...state,
       networkMismatch: true
+    }
+  }
+  if (action.type === Action.HTTPS_PROVIDER_SET) {
+    return {
+      ...state,
+      httpsProvider: action.httpsProvider,
+      httpsConnection: action.web3
+    }
+  }
+  if (action.type === Action.WSS_PROVIDER_SET) {
+    return {
+      ...state,
+      wssProvider: action.wssProvider,
+      wssConnection: action.web3
+    }
+  }
+  if (action.type === Action.WALLET_SET) {
+    return {
+      ...state,
+      wallet: action.wallet,
+      walletConnection: action.web3
     }
   }
 
