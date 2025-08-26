@@ -6,7 +6,7 @@ import * as ContractActions from './contracts/constants'
 import * as DrizzleActions from './drizzleStatus/constants'
 
 // Load as promise so that async Drizzle initialization can still resolve
-const isEnvReadyPromise = new Promise((resolve, reject) => {
+const isEnvReadyPromise = new Promise((resolve) => {
   const hasNavigator = typeof navigator !== 'undefined'
   const hasWindow = typeof window !== 'undefined'
   const hasDocument = typeof document !== 'undefined'

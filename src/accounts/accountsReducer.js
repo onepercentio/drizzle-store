@@ -14,13 +14,6 @@ const accountsReducer = (state = initialState, action) => {
     }
   }
 
-  if (action.type === AccountsActions.ACCOUNTS_POLLING) {
-    return {
-      ...state,
-      accounts: action.accounts
-    }
-  }
-
   return state
 }
 

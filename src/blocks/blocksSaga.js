@@ -17,7 +17,7 @@ export function createBlockChannel ({ drizzle, web3, syncAlways }) {
       web3.currentProvider.constructor.name === 'WebsocketProvider'
     ) {
       const blockEvents = web3.eth
-        .subscribe('newBlockHeaders', (error, result) => {
+        .subscribe('newBlockHeaders', (error) => {
           if (error) {
             emit({ type: BlocksActions.BLOCKS_FAILED, error })
 
@@ -92,10 +92,11 @@ export function createBlockPollChannel ({
     })
 
     const unsubscribe = () => {
-      blockTracker.stop().catch(_ => {
+      blockTracker.stop().catch(error => {
         // BlockTracker assumes there is an outstanding event subscription.
         // However for our tests we start and stop a BlockTracker in succession
         // that triggers an error.
+        console.error(error)
       })
     }
 
@@ -136,7 +137,7 @@ function * processBlockHeader ({ blockHeader, drizzle, web3, syncAlways }) {
   try {
     const block = yield call(web3.eth.getBlock, blockNumber, true)
 
-    yield call(processBlock, { block, drizzle, web3, syncAlways })
+    yield call(processBlock, { block, drizzle, syncAlways })
   } catch (error) {
     console.error('Error in block processing:')
     console.error(error)
@@ -145,7 +146,7 @@ function * processBlockHeader ({ blockHeader, drizzle, web3, syncAlways }) {
   }
 }
 
-function * processBlock ({ block, drizzle, web3, syncAlways }) {
+function * processBlock ({ block, drizzle, syncAlways }) {
   try {
     // Emit block for addition to store.
     // Regardless of syncing success/failure, this is still the latest block.

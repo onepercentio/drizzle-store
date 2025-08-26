@@ -65,7 +65,7 @@ class DrizzleContract {
     }
   }
 
-  cacheCallFunction (fnName, fnIndex, fn) {
+  cacheCallFunction (fnName, fnIndex) {
     const contract = this
 
     return function () {
@@ -103,7 +103,7 @@ class DrizzleContract {
     }
   }
 
-  cacheSendFunction (fnName, fnIndex, fn) {
+  cacheSendFunction (fnName, fnIndex) {
     // NOTE: May not need fn index
     const contract = this
 
