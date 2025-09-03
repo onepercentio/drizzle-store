@@ -4,12 +4,14 @@ import createSagaMiddleware from 'redux-saga'
 import drizzleSagas from './rootSaga'
 import drizzleReducers from './reducer'
 import { generateContractsInitialState } from './contractStateUtils'
-import drizzleMW from './drizzle-middleware'
+import createDrizzleMiddleware from './drizzle-middleware'
 
 const composeSagas = sagas =>
   function * () {
     yield all(sagas.map(fork))
   }
+
+const drizzleMW = createDrizzleMiddleware()
 
 /**
  * Generate the redux store by combining drizzleOptions, application reducers,

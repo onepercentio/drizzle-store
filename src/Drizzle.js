@@ -79,8 +79,8 @@ class Drizzle {
       contractConfig.contractName,
       this.store,
       events,
-      null,
-      wssConnection
+      wssConnection,
+      contractConfig.blockNumber || 0
     )
 
     if (this.contracts[drizzleContract.contractName]) {

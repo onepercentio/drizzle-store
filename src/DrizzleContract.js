@@ -8,18 +8,18 @@ class DrizzleContract {
     name,
     store,
     events = [],
-    contractArtifact = {},
-    wssConnection = null
+    wssConnection = null,
+    blockNumber = 0
   ) {
     this.abi = web3Contract.options.jsonInterface
     this.address = web3Contract.options.address
     this.web3 = web3
     this.wssConnection = wssConnection
     this.contractName = name
-    this.contractArtifact = contractArtifact
     this.store = store
     this.methods = web3Contract._methods
     this.events = web3Contract._events
+    this.blockNumber = blockNumber
 
     // Merge web3 contract instance into DrizzleContract instance.
     Object.assign(this, web3Contract)
@@ -45,20 +45,23 @@ class DrizzleContract {
             contract: {
               ...wssContract,
               contractName: this.contractName,
-              events: this.events
+              events: this.events,
+              blockNumber: this.blockNumber
             },
             eventName: event.eventName,
-            eventOptions: event.eventOptions
+            eventOptions: event.eventOptions,
+            blockNumber: this.blockNumber
           })
         } else {
           store.dispatch({
             type: ContractActions.LISTEN_FOR_EVENT,
-            contract: {
-              ...wssContract,
+            contract: wssContract,
+            eventName: event,
+            eventOptions: {
               contractName: this.contractName,
-              events: this.events
-            },
-            eventName: event
+              events: this.events,
+              fromBlock: `0x${this.blockNumber.toString(16) || '0'}`
+            }
           })
         }
       }

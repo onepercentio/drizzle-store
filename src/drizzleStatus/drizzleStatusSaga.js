@@ -1,7 +1,7 @@
 import { call, put, takeLatest } from 'redux-saga/effects'
 
 // Initialization Functions
-import { initializeWeb3, getNetworkId } from '../web3/web3Saga'
+import { initializeWeb3, getNetworkId, initializeWallet } from '../web3/web3Saga'
 import { getAccountBalances } from '../accountBalances/accountBalancesSaga'
 import * as DrizzleActions from './constants'
 import * as BlocksActions from '../blocks/constants'
@@ -10,20 +10,16 @@ import { getAccounts } from '../accounts/accountsSaga'
 export function * initializeDrizzle (action) {
   const { drizzle, options } = action
   try {
-    // Initialize web3 and get the current network ID.
-    const connections = yield call(initializeWeb3, options)
-    drizzle.web3 = connections.wallet
-    let web3 = connections.https || connections.wallet
+    drizzle.web3 = yield call(initializeWallet)
 
-    // Client may opt out of connecting their account to the dapp Guard against
-    // further web3 interaction, and note web3 will be undefined
-    //
-    if (web3) {
-      yield call(getNetworkId, { web3 })
+    if (drizzle.web3) {
+      const networkId = yield call(getNetworkId, { web3: drizzle.web3 })
 
       // Get initial accounts list and balances.
       const accounts = yield call(getAccounts, { web3 })
       yield call(getAccountBalances, { web3, accounts })
+
+      const connections = yield call(initializeWeb3, options, networkId)
 
       // Instantiate contracts passed through via options.
       for (let i = 0; i < options.contracts.length; i++) {
@@ -45,8 +41,6 @@ export function * initializeDrizzle (action) {
         yield put({ type: BlocksActions.BLOCKS_LISTENING, drizzle, interval, web3: connections.wss, syncAlways })
       } else if (connections.https) {
         yield put({ type: BlocksActions.BLOCKS_POLLING, drizzle, web3: connections.https, syncAlways })
-      } else {
-        yield put({ type: BlocksActions.BLOCKS_POLLING, drizzle, web3: connections.wallet, syncAlways })
       }
     }
   } catch (error) {
@@ -57,7 +51,7 @@ export function * initializeDrizzle (action) {
     return
   }
 
-  yield put({ type: DrizzleActions.DRIZZLE_INITIALIZED, drizzle })
+  yield put({ type: DrizzleActions.DRIZZLE_INITIALIZED, drizzle, options })
 }
 
 function * drizzleStatusSaga () {

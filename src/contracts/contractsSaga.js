@@ -10,15 +10,12 @@ import * as TransactionsActions from '../transactions/constants'
 export function createContractEventChannel ({
   contract,
   eventName,
-  customOptions = {}
+  eventOptions = {}
 }) {
-  const name = contract.contractName
+  const name = eventOptions.contractName
   return eventChannel(emit => {
-    const options = {
-      fromBlock: 0,
-      ...customOptions
-    }
-    const eventListener = contract.events[eventName](options)
+    const eventListener = contract.events[eventName](eventOptions)
+
     eventListener.on('data', event => {
       emit({ type: ContractActions.EVENT_FIRED, name, event })
     })
